@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, Role } from 'src/user/schemas/user.schema';
 import { Model, Types } from 'mongoose';
-import { compare } from 'bcrypt';
+import { compare, hashSync } from 'bcrypt';
 import { AuthDto } from './auth.dto';
-import { CustomException } from 'src/filters/custom-exception.filter';
-import * as bcrypt from 'bcrypt';
+import { CustomException } from 'src/common/filters/custom-exception.filter';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -16,29 +15,19 @@ export class AuthService {
   ) {}
 
   async createAccessToken(payload: { _id: Types.ObjectId; role: Role }) {
-    console.log(process.env.JWT_KEY);
     try {
-      return this.jwtService.signAsync(payload, { expiresIn: '15m' });
+      return this.jwtService.signAsync(payload, { expiresIn: '1d' });
     } catch (e) {
       console.log(e);
     }
   }
 
   async createRefreshToken(payload: { _id: Types.ObjectId; role: Role }) {
-    console.log(process.env.JWT_KEY + ' 2');
     try {
       return this.jwtService.signAsync(payload, { expiresIn: '7d' });
     } catch (e) {
       console.log(e);
     }
-  }
-
-  async verifyToken(token: string) {
-    return this.jwtService.verifyAsync(token, { secret: process.env.JWT_KEY });
-  }
-
-  async decodeToken(token: string) {
-    return this.jwtService.decode(token);
   }
 
   async signUp(signUpData: AuthDto) {
@@ -47,7 +36,7 @@ export class AuthService {
 
     if (user) throw new CustomException('User already registered');
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = hashSync(password, 10);
 
     user = await this.userModel.create({
       phone,
@@ -86,7 +75,7 @@ export class AuthService {
 
     if (user) throw new CustomException('User already registered');
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = hashSync(password, 10);
 
     user = await this.userModel.create({
       phone,

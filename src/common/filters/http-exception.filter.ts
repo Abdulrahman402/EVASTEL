@@ -20,17 +20,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const isProduction = process.env.NODE_ENV === 'production';
 
+    console.error(exception);
+
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       message:
         !isProduction && exception instanceof Error
-          ? exception.message
+          ? exception['response'].message
+            ? exception['response'].message
+            : exception['response']
           : 'Internal server error',
     };
-
-    console.error(exception);
 
     response.status(status).json(errorResponse);
   }

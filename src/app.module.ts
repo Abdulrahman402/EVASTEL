@@ -5,7 +5,9 @@ import { UserModule } from './user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from './guards/roles.guard';
+import { RolesGuard } from './common/guards/roles.guard';
+import { ProductModule } from './product/product.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { RolesGuard } from './guards/roles.guard';
     }),
     AuthModule,
     UserModule,
+    ProductModule,
+    OrderModule,
   ],
   providers: [
     {
