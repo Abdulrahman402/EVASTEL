@@ -28,5 +28,6 @@ import { OrderModule } from './order/order.module';
       useClass: RolesGuard,
     },
   ],
+  controllers: [],
 })
 export class AppModule {}

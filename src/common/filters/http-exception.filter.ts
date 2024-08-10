@@ -22,16 +22,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     console.error(exception);
 
+    let errMessage;
+
+    if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
+      errMessage = 'Internal server error';
+    } else if (!isProduction && exception instanceof Error) {
+      errMessage = exception['response']?.message || exception.message || null;
+    } else {
+      errMessage =
+        exception['response']?.message || 'An unexpected error occurred';
+    }
+
     const errorResponse = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message:
-        !isProduction && exception instanceof Error
-          ? exception['response'].message
-            ? exception['response'].message
-            : exception['response']
-          : 'Internal server error',
+      message: errMessage,
     };
 
     response.status(status).json(errorResponse);

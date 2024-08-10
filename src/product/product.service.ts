@@ -63,7 +63,6 @@ export class ProductService {
 
   async allProducts() {
     const products = await this.productModel.find({ deletedAt: null });
-    console.log(products);
 
     if (!products || products.length == 0)
       throw new CustomException('No products found');
