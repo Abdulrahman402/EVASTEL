@@ -4,21 +4,32 @@ import { Order } from 'src/order/schemas/order.schema';
 import { Model } from 'mongoose';
 import { startOfDay, endOfDay } from 'date-fns';
 import { OrderStatus } from 'src/order/schemas/order.schema';
+import { RedisCacheService } from 'src/cache/redis.cache';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(Order.name) private orderModel: Model<Order>) {}
+  constructor(
+    @InjectModel(Order.name) private orderModel: Model<Order>,
+    private redis: RedisCacheService,
+  ) {}
 
   async report(date: string) {
     const start = startOfDay(new Date(date));
     const end = endOfDay(new Date(date));
-    console.log(new Date('2024-08-10T12:12:00.800+00:00'));
 
-    console.log(start, end);
+    const dataFromRedis = await this.redis.get('date');
+
+    if (dataFromRedis) return JSON.parse(dataFromRedis);
 
     const result = await this.orderModel.aggregate([
       {
-        $match: { status: { $ne: OrderStatus.CANCELLED } },
+        $match: {
+          status: { $ne: OrderStatus.CANCELLED },
+          createdAt: {
+            $gte: new Date(start),
+            $lte: new Date(end),
+          },
+        },
       },
       {
         $facet: {
@@ -65,6 +76,8 @@ export class UserService {
         },
       },
     ]);
+
+    this.redis.set(`${date}`, JSON.stringify(result));
 
     return result[0];
   }

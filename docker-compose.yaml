@@ -11,11 +11,12 @@ services:
       DATABASE_USER: ${DB_USERNAME}
       DATABASE_PASS: ${DB_PASSWORD}
       DATABASE_URI: ${DB_CONNECTION}
+      REDIS_URL: redis://redis:6379  
     ports:
       - '3000:3000'
     depends_on:
       - database
-
+      - redis 
 
   database:
     image: mongo:6.0
@@ -26,3 +27,10 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    restart: always
+    ports:
+      - '6379:6379'
